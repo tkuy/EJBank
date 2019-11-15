@@ -9,6 +9,6 @@ public class TestBean implements TestBeanLocal {
 
     @Override
     public String test() {
-        return "FROM EJB";
+        return "Hello from EJB";
     }
 }
