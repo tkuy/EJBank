@@ -7,7 +7,6 @@ services:
         environment:
             MYSQL_ROOT_PASSWORD: root
             MYSQL_DATABASE: ejbank
-            MYSQL_USER: root
             MYSQL_PASSWORD: root
 
     phpmyadmin:
@@ -24,5 +23,6 @@ services:
         ports:
             - 8001:8080
             - 8002:4848
+        command: ["./wait-for-it.sh", "db:3306", "--", "asadmin", "start-domain",  "--verbose"]
 
 

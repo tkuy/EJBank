@@ -96,16 +96,6 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="mboudign" id="2-7">
-        <createTable tableName="ejbank_user_role">
-            <column name="login" type="CHAR(8)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="role" type="VARCHAR(50)">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-    </changeSet>
     <changeSet author="mboudign" id="2-16">
         <addForeignKeyConstraint baseColumnNames="account_type_id" baseTableName="ejbank_account" constraintName="fk_account_account_typ" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="ejbank_account_type"/>
     </changeSet>
@@ -169,28 +159,6 @@
             <column name="firstname" value="Vincent"/>
             <column name="lastname" value="Fournier"/>
             <column name="type" value="advisor"/>
-        </insert>
-    </changeSet>
-    <changeSet author="mboudign" id="3-6">
-        <insert tableName="ejbank_user_role">
-            <column name="login" value="jdupont"/>
-            <column name="role" value="ROLE_CUSTOMER"/>
-        </insert>
-        <insert tableName="ejbank_user_role">
-            <column name="login" value="spetit"/>
-            <column name="role" value="ROLE_CUSTOMER"/>
-        </insert>
-        <insert tableName="ejbank_user_role">
-            <column name="login" value="lperrin"/>
-            <column name="role" value="ROLE_CUSTOMER"/>
-        </insert>
-        <insert tableName="ejbank_user_role">
-            <column name="login" value="cmoreau"/>
-            <column name="role" value="ROLE_ADVISOR"/>
-        </insert>
-        <insert tableName="ejbank_user_role">
-            <column name="login" value="vfournie"/>
-            <column name="role" value="ROLE_ADVISOR"/>
         </insert>
     </changeSet>
     <changeSet author="mboudign" id="3-3">

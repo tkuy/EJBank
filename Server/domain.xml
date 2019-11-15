@@ -78,7 +78,7 @@
       <system-property name="JMS_PROVIDER_PORT" description="Port Number that JMS Service will listen for remote clients connection." value="7676"></system-property>
       <http-service>
         <access-log></access-log>
-        <virtual-server default-web-module="EJBank#EJBank-web-1.0-SNAPSHOT.war" network-listeners="http-listener-1,http-listener-2" id="server"></virtual-server>
+        <virtual-server network-listeners="http-listener-1,http-listener-2" id="server"></virtual-server>
         <virtual-server network-listeners="admin-listener" id="__asadmin"></virtual-server>
       </http-service>
       <iiop-service>
