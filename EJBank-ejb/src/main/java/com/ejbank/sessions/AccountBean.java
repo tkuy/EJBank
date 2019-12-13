@@ -21,7 +21,17 @@ public class AccountBean implements AccountBeanLocal {
     @Override
     public PayloadAccounts accountsByUser(int userId) {
         List<PayloadAccount> accounts = new ArrayList<>();
-        for (AccountEntity accountEntity : customerRepository.findByUser(userId)) {
+        for (AccountEntity accountEntity : customerRepository.findAccountsByUser(userId)) {
+            accounts.add(new PayloadAccount(accountEntity.getId(), accountEntity.getAccountType().getName(), accountEntity.getBalance()));
+        }
+//        return customerRepository.findByUser(userId).stream().map(account -> new PayloadAccount(account.getId(), account.getAccountType().getName(), account.getBalance())).collect(Collectors.toList());
+        return new PayloadAccounts(accounts);
+    }
+
+    @Override
+    public PayloadAccounts allAccountsByUser(int userId) {
+        List<PayloadAccount> accounts = new ArrayList<>();
+        for (AccountEntity accountEntity : customerRepository.findAccountsByUser(userId)) {
             accounts.add(new PayloadAccount(accountEntity.getId(), accountEntity.getAccountType().getName(), accountEntity.getBalance()));
         }
 //        return customerRepository.findByUser(userId).stream().map(account -> new PayloadAccount(account.getId(), account.getAccountType().getName(), account.getBalance())).collect(Collectors.toList());

@@ -16,6 +16,7 @@ public class AccountEntity {
     @JoinColumn(name = "account_type_id", referencedColumnName = "id")
     private AccountTypeEntity accountType;
 
+
     public int getId() {
         return id;
     }

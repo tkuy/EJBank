@@ -23,9 +23,16 @@ public class Account {
     public PayloadAccounts getUserInfo(@PathParam("user_id") int id) {
         return accountBeanLocal.accountsByUser(id);
     }
+
     @GET
     @Path("/test")
     public String getUser() {
         return "Response";
+    }
+
+    @GET
+    @Path("/accounts/all/{user_id}")
+    public PayloadAccounts getAllUserAccounts(@PathParam("user_id") int id) {
+        return accountBeanLocal.allAccountsByUser(id);
     }
 }

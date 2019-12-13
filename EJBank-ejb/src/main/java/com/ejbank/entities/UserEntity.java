@@ -4,7 +4,9 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "ejbank_user")
-public class UserEntity {
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "type")
+public abstract class UserEntity {
     @Id
     @Column(name = "id")
     private int id;
