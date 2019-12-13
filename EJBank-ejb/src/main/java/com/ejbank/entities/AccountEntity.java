@@ -1,6 +1,7 @@
 package com.ejbank.entities;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "ejbank_account")
@@ -16,6 +17,13 @@ public class AccountEntity {
     @JoinColumn(name = "account_type_id", referencedColumnName = "id")
     private AccountTypeEntity accountType;
 
+    @OneToMany
+    @JoinColumn(name = "account_id_from")
+    private List<TransactionEntity> transactionsFrom;
+
+    @OneToMany
+    @JoinColumn(name = "account_id_to")
+    private List<TransactionEntity> transactionsTo;
 
     public int getId() {
         return id;
@@ -31,5 +39,13 @@ public class AccountEntity {
 
     public AccountTypeEntity getAccountType() {
         return accountType;
+    }
+
+    public List<TransactionEntity> getTransactionsFrom() {
+        return transactionsFrom;
+    }
+
+    public List<TransactionEntity> getTransactionsTo() {
+        return transactionsTo;
     }
 }

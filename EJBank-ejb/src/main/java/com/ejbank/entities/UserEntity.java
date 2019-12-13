@@ -31,4 +31,8 @@ public abstract class UserEntity {
     public String getLastname() {
         return lastname;
     }
+
+    public String getType() {
+        return type;
+    }
 }

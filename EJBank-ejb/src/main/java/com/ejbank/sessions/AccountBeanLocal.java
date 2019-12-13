@@ -10,4 +10,7 @@ import java.util.List;
 @Local
 public interface AccountBeanLocal {
     PayloadAccounts accountsByUser(int userId);
+    PayloadAccounts accountsByAdvisor(int userId);
+
+    PayloadAccounts allAccounts(int userId);
 }

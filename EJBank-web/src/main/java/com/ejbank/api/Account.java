@@ -31,8 +31,16 @@ public class Account {
     }
 
     @GET
-    @Path("/accounts/all/{user_id}")
+    @Path("/attached/{user_id}")
     public PayloadAccounts getAllUserAccounts(@PathParam("user_id") int id) {
-        return null; //TODO
+        return accountBeanLocal.accountsByAdvisor(id);
     }
+
+    @GET
+    @Path("/all/{user_id}")
+    public PayloadAccounts getAllAccounts(@PathParam("user_id") int id) {
+        return accountBeanLocal.allAccounts(id);
+    }
+
+
 }
