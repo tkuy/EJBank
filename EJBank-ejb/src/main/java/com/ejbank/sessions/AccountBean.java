@@ -2,6 +2,7 @@ package com.ejbank.sessions;
 
 import com.ejbank.entities.AccountEntity;
 import com.ejbank.payload.PayloadAccount;
+import com.ejbank.payload.PayloadAccounts;
 import com.ejbank.repositories.AccountRepository;
 import com.ejbank.repositories.CustomerRepository;
 
@@ -18,12 +19,12 @@ public class AccountBean implements AccountBeanLocal {
     private CustomerRepository customerRepository;
 
     @Override
-    public List<PayloadAccount> accountsByUser(int userId) {
+    public PayloadAccounts accountsByUser(int userId) {
         List<PayloadAccount> accounts = new ArrayList<>();
         for (AccountEntity accountEntity : customerRepository.findByUser(userId)) {
             accounts.add(new PayloadAccount(accountEntity.getId(), accountEntity.getAccountType().getName(), accountEntity.getBalance()));
         }
 //        return customerRepository.findByUser(userId).stream().map(account -> new PayloadAccount(account.getId(), account.getAccountType().getName(), account.getBalance())).collect(Collectors.toList());
-        return accounts;
+        return new PayloadAccounts(accounts);
     }
 }
