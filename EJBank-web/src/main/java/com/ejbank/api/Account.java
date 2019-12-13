@@ -33,6 +33,6 @@ public class Account {
     @GET
     @Path("/accounts/all/{user_id}")
     public PayloadAccounts getAllUserAccounts(@PathParam("user_id") int id) {
-        return accountBeanLocal.allAccountsByUser(id);
+        return null; //TODO
     }
 }

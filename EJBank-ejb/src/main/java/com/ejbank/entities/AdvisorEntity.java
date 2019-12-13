@@ -6,6 +6,6 @@ import java.util.List;
 @Entity
 @Table(name = "ejbank_advisor")
 @DiscriminatorValue("advisor")
-public class AdviserEntity extends UserEntity {
+public class AdvisorEntity extends UserEntity {
 
 }

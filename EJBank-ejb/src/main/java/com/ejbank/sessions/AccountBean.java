@@ -1,6 +1,7 @@
 package com.ejbank.sessions;
 
 import com.ejbank.entities.AccountEntity;
+import com.ejbank.entities.CustomerEntity;
 import com.ejbank.payload.PayloadAccount;
 import com.ejbank.payload.PayloadAccounts;
 import com.ejbank.repositories.AccountRepository;
@@ -21,18 +22,9 @@ public class AccountBean implements AccountBeanLocal {
     @Override
     public PayloadAccounts accountsByUser(int userId) {
         List<PayloadAccount> accounts = new ArrayList<>();
-        for (AccountEntity accountEntity : customerRepository.findAccountsByUser(userId)) {
-            accounts.add(new PayloadAccount(accountEntity.getId(), accountEntity.getAccountType().getName(), accountEntity.getBalance()));
-        }
-//        return customerRepository.findByUser(userId).stream().map(account -> new PayloadAccount(account.getId(), account.getAccountType().getName(), account.getBalance())).collect(Collectors.toList());
-        return new PayloadAccounts(accounts);
-    }
-
-    @Override
-    public PayloadAccounts allAccountsByUser(int userId) {
-        List<PayloadAccount> accounts = new ArrayList<>();
-        for (AccountEntity accountEntity : customerRepository.findAccountsByUser(userId)) {
-            accounts.add(new PayloadAccount(accountEntity.getId(), accountEntity.getAccountType().getName(), accountEntity.getBalance()));
+        CustomerEntity user = customerRepository.findById(userId);
+        for (AccountEntity accountEntity :user.getAccounts()) {
+            accounts.add(new PayloadAccount(accountEntity.getId(), accountEntity.getAccountType().getName(), accountEntity.getBalance(), user.getFirstname()+" "+user.getLastname()));
         }
 //        return customerRepository.findByUser(userId).stream().map(account -> new PayloadAccount(account.getId(), account.getAccountType().getName(), account.getBalance())).collect(Collectors.toList());
         return new PayloadAccounts(accounts);

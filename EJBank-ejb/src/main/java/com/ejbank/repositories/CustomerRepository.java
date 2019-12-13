@@ -16,8 +16,4 @@ public class CustomerRepository {
     public CustomerEntity findById(int id) {
         return em.find(CustomerEntity.class, id);
     }
-    public List<AccountEntity> findAccountsByUser(int userId) {
-        CustomerEntity customer = em.find(CustomerEntity.class, userId);
-        return customer.getAccounts();
-    }
 }
