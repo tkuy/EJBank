@@ -24,7 +24,7 @@ public class TransactionBean implements TransactionBeanLocal {
         double before = src.getBalance();
         double after = src.getBalance() - payloadTransactionRequest.getAmount();
         String message = null;
-        boolean result = after >= 0;
+        boolean result = after >= (-src.getAccountType().getOverdraft());
         if(!result) {
             message = "Vous ne disposez pas d'un solde suffisant";
         }
