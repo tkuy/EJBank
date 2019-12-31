@@ -2,17 +2,22 @@ package com.ejbank.payload;
 
 import java.io.Serializable;
 
-public class PayloadTransactionRecap implements Serializable {
+public class PayloadTransactionRequest implements Serializable {
     private int source;
     private int destination;
     private double amount;
     private int author;
+    private String comment;
 
-    public PayloadTransactionRecap(int source, int destination, double amount, int author) {
+
+    public PayloadTransactionRequest(int source, int destination, double amount, int author) {
         this.source = source;
         this.destination = destination;
         this.amount = amount;
         this.author = author;
+    }
+
+    public PayloadTransactionRequest() {
     }
 
     public int getSource() {
@@ -45,5 +50,13 @@ public class PayloadTransactionRecap implements Serializable {
 
     public void setAuthor(int author) {
         this.author = author;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }

@@ -1,27 +1,27 @@
 package com.ejbank.api;
 
-import com.ejbank.payload.PayloadTransactionRecap;
-import com.ejbank.sessions.AccountBeanLocal;
+import com.ejbank.payload.PayloadTransaction;
+import com.ejbank.payload.PayloadTransactionRequest;
+import com.ejbank.sessions.TransactionBeanLocal;
 
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 @Path("/transaction")
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 @RequestScoped
 public class Transaction {
     @EJB
-    private AccountBeanLocal accountBeanLocal ;
+    private TransactionBeanLocal transactionBeanLocal;
 
     @POST
     @Path("/preview")
-    public String postPreview(PayloadTransactionRecap payloadTransactionRecap) {
-        return null; //TODO
+    @Consumes(MediaType.APPLICATION_JSON)
+    public PayloadTransaction postPreview(PayloadTransactionRequest payloadTransactionRequest) {
+        return transactionBeanLocal.previewTransaction(payloadTransactionRequest);
     }
-
-
 
 }
