@@ -1,13 +1,10 @@
 package com.ejbank.api;
 
 import com.ejbank.payload.PayloadUser;
-import com.ejbank.repositories.UserRepository;
-import com.ejbank.sessions.UserBean;
 import com.ejbank.sessions.UserBeanLocal;
 
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -25,7 +22,6 @@ public class UserInfo {
     @GET
     @Path("/{id}")
     public PayloadUser getUserInfo(@PathParam("id") int id) {
-//        return new PayloadUser(String.valueOf(id), "ci est un test");
         return userBean.namesByUserId(id);
     }
     @GET

@@ -1,12 +1,10 @@
 package com.ejbank.repositories;
 
-import com.ejbank.entities.AccountEntity;
 import com.ejbank.entities.CustomerEntity;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.List;
 
 @Stateless
 public class CustomerRepository {

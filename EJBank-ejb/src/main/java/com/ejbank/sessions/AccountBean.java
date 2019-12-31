@@ -6,7 +6,6 @@ import com.ejbank.entities.CustomerEntity;
 import com.ejbank.entities.UserEntity;
 import com.ejbank.payload.PayloadAccount;
 import com.ejbank.payload.PayloadAccounts;
-import com.ejbank.repositories.AccountRepository;
 import com.ejbank.repositories.AdvisorRepository;
 import com.ejbank.repositories.CustomerRepository;
 import com.ejbank.repositories.UserRepository;

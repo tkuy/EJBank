@@ -1,7 +1,5 @@
 package com.ejbank.sessions;
 
-import com.ejbank.entities.TransactionEntity;
-import com.ejbank.payload.PayloadAccounts;
 import com.ejbank.payload.PayloadTransaction;
 import com.ejbank.payload.PayloadTransactionRequest;
 

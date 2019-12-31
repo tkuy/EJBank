@@ -1,7 +1,6 @@
 package com.ejbank.repositories;
 
 import com.ejbank.entities.AccountEntity;
-import com.ejbank.entities.UserEntity;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
