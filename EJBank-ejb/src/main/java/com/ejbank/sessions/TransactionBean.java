@@ -20,7 +20,6 @@ public class TransactionBean implements TransactionBeanLocal {
     @Override
     public PayloadTransaction previewTransaction(PayloadTransactionRequest payloadTransactionRequest) {
         AccountEntity src = accountRepository.findById(payloadTransactionRequest.getSource());
-        AccountEntity dest = accountRepository.findById(payloadTransactionRequest.getDestination());
         double before = src.getBalance();
         double after = src.getBalance() - payloadTransactionRequest.getAmount();
         String message = null;
