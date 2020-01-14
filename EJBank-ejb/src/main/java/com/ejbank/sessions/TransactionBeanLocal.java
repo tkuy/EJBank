@@ -11,4 +11,5 @@ import javax.ejb.Local;
 public interface TransactionBeanLocal {
     PayloadTransaction previewTransaction(PayloadTransactionRequest payloadTransactionRequest);
     PayloadResult commitTransaction(PayloadTransactionRequest payloadTransactionRequest);
+    int getAllWaitingTransactions(int userId);
 }

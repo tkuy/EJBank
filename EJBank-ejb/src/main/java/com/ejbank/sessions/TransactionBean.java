@@ -2,6 +2,7 @@ package com.ejbank.sessions;
 
 import com.ejbank.entities.AccountEntity;
 import com.ejbank.entities.TransactionEntity;
+import com.ejbank.entities.UserEntity;
 import com.ejbank.errors.DepositException;
 import com.ejbank.errors.TransactionException;
 import com.ejbank.errors.TransactionInsertionException;
@@ -121,6 +122,7 @@ public class TransactionBean implements TransactionBeanLocal, Serializable {
             throw new WithdrawException();
         }
     }
+
     private void depositAmount(AccountEntity account, double amount) throws DepositException {
         try {
             logger.log(Level.INFO, "deposit : " + amount);
@@ -130,5 +132,12 @@ public class TransactionBean implements TransactionBeanLocal, Serializable {
             throw new DepositException();
         }
     }
-
+    public int getAllWaitingTransactions(int userId) {
+        UserEntity user = userRepository.findById(userId);
+        int rep = 0;
+        for (TransactionEntity transaction : user.getTransactions()) {
+            if (!transaction.isApplied()) rep++;
+        }
+        return rep;
+    }
 }

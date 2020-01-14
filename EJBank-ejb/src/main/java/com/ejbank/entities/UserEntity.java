@@ -1,6 +1,7 @@
 package com.ejbank.entities;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "ejbank_user")
@@ -20,6 +21,15 @@ public abstract class UserEntity {
     private String lastname;
     @Column(name = "type")
     private String type;
+
+    @OneToMany
+    @JoinColumn(name = "author")
+    private List<TransactionEntity> transactions;
+    public List<TransactionEntity> getTransactions() {
+        return transactions;
+    }
+
+
     public int getId() {
         return id;
     }

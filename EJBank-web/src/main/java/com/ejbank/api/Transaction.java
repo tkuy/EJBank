@@ -7,10 +7,7 @@ import com.ejbank.sessions.TransactionBeanLocal;
 
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 @Path("/transaction")
@@ -34,5 +31,10 @@ public class Transaction {
         return transactionBeanLocal.commitTransaction(payloadTransactionRequest);
     }
 
+    @GET
+    @Path("/validation/notification/{user_id}")
+    public int validationNumber(@PathParam("user_id") int id) {
+        return transactionBeanLocal.getAllWaitingTransactions(id);
+    }
 
 }
