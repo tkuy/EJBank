@@ -48,4 +48,28 @@ public class AccountEntity {
     public List<TransactionEntity> getTransactionsTo() {
         return transactionsTo;
     }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setCustomerId(int customerId) {
+        this.customerId = customerId;
+    }
+
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+
+    public void setAccountType(AccountTypeEntity accountType) {
+        this.accountType = accountType;
+    }
+
+    public void setTransactionsFrom(List<TransactionEntity> transactionsFrom) {
+        this.transactionsFrom = transactionsFrom;
+    }
+
+    public void setTransactionsTo(List<TransactionEntity> transactionsTo) {
+        this.transactionsTo = transactionsTo;
+    }
 }

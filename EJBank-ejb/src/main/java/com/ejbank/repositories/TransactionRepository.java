@@ -15,4 +15,8 @@ public class TransactionRepository {
         return em.find(TransactionEntity.class, id);
     }
 
+    public void create(TransactionEntity transactionEntity) {
+        em.persist(transactionEntity);
+    }
+
 }

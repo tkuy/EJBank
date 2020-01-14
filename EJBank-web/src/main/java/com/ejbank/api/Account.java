@@ -42,5 +42,4 @@ public class Account {
         return accountBeanLocal.allAccounts(id);
     }
 
-
 }

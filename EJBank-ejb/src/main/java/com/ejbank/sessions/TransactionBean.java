@@ -1,32 +1,134 @@
 package com.ejbank.sessions;
 
 import com.ejbank.entities.AccountEntity;
+import com.ejbank.entities.TransactionEntity;
+import com.ejbank.errors.DepositException;
+import com.ejbank.errors.TransactionException;
+import com.ejbank.errors.TransactionInsertionException;
+import com.ejbank.errors.WithdrawException;
+import com.ejbank.payload.PayloadResult;
 import com.ejbank.payload.PayloadTransaction;
 import com.ejbank.payload.PayloadTransactionRequest;
 import com.ejbank.repositories.AccountRepository;
 import com.ejbank.repositories.TransactionRepository;
+import com.ejbank.repositories.UserRepository;
 
-import javax.ejb.Local;
-import javax.ejb.Stateless;
+import javax.annotation.Resource;
+import javax.ejb.*;
 import javax.inject.Inject;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.transaction.*;
+import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 @Stateless
-@Local
-public class TransactionBean implements TransactionBeanLocal {
+@TransactionManagement(TransactionManagementType.BEAN)
+public class TransactionBean implements TransactionBeanLocal, Serializable {
+
+    private InitialContext ctx = new InitialContext();
+    private UserTransaction tx = (UserTransaction) ctx.lookup("UserTransaction");
+    private Logger logger = Logger.getLogger("TransactionBeanLogger");
     @Inject
     private TransactionRepository transactionRepository;
     @Inject
     private AccountRepository accountRepository;
+    @Inject
+    private UserRepository userRepository;
+
+    public TransactionBean() throws NamingException {
+    }
 
     @Override
     public PayloadTransaction previewTransaction(PayloadTransactionRequest payloadTransactionRequest) {
         AccountEntity src = accountRepository.findById(payloadTransactionRequest.getSource());
         double before = src.getBalance();
         double after = src.getBalance() - payloadTransactionRequest.getAmount();
-        String message = null;
         boolean result = after >= (-src.getAccountType().getOverdraft());
+        String message = null;
         if(!result) {
             message = "Vous ne disposez pas d'un solde suffisant";
         }
         return new PayloadTransaction(result, (int) before, (int) after, message, null);
     }
+    private TransactionEntity computeTransactionResponse(PayloadTransactionRequest payloadTransactionRequest) {
+        boolean waitingValidation = payloadTransactionRequest.getAmount() > 1000;
+        return new TransactionEntity(
+                0,
+                accountRepository.findById(payloadTransactionRequest.getSource()),
+                accountRepository.findById(payloadTransactionRequest.getDestination()),
+                userRepository.findById(payloadTransactionRequest.getAuthor()),
+                payloadTransactionRequest.getAmount(),
+                payloadTransactionRequest.getComment(),
+                !waitingValidation,
+                new java.sql.Date(new java.util.Date().getTime())
+                );
+    }
+    @Override
+    public PayloadResult commitTransaction(PayloadTransactionRequest payloadTransactionRequest) {
+        logger.log(Level.INFO, "Commit");
+        System.out.println("SYSOUT");
+        PayloadTransaction payloadTransaction = previewTransaction(payloadTransactionRequest);
+        //enough money
+        if(payloadTransaction.isResult()) {
+            TransactionEntity transactionEntity = computeTransactionResponse(payloadTransactionRequest);
+            logger.log(Level.INFO, transactionEntity.toString());
+            if(transactionEntity.isApplied()) {
+                logger.log(Level.INFO, "The transaction will be applied");
+                AccountEntity src = accountRepository.findById(payloadTransactionRequest.getSource());
+                AccountEntity dest = accountRepository.findById(payloadTransactionRequest.getDestination());
+                try {
+                    tx.begin();
+                    withdrawAmount(src, payloadTransactionRequest.getAmount());
+                    depositAmount(dest, payloadTransactionRequest.getAmount());
+                    createTransaction(transactionEntity);
+                    tx.commit();
+                } catch (WithdrawException | DepositException | TransactionInsertionException e) {
+                    try {
+                        tx.rollback();
+                    } catch (SystemException ex) {
+                        return new PayloadResult(false, "The operation failed, you can try again later");
+                    }
+                } catch (HeuristicRollbackException | HeuristicMixedException | SystemException | NotSupportedException | RollbackException e) {
+                    return new PayloadResult(false, "Internal error, don't worry");
+                }
+            } else {
+                try {
+                    logger.log(Level.INFO, "The transaction will not be applied but only inserted");
+                    createTransaction(transactionEntity);
+                } catch (TransactionInsertionException e) {
+                    return new PayloadResult(false, "Insertion failed for the transaction");
+                }
+            }
+        }
+        return new PayloadResult(payloadTransaction.isResult(), payloadTransaction.getMessage());
+    }
+    private void createTransaction(TransactionEntity transactionEntity) throws TransactionInsertionException {
+        try {
+            logger.log(Level.INFO, "Insert transaction");
+            transactionRepository.create(transactionEntity);
+        } catch (Exception e) {
+            throw new TransactionInsertionException();
+        }
+    }
+    private void withdrawAmount(AccountEntity account, double amount) throws WithdrawException {
+        try {
+            logger.log(Level.INFO, "Withdraw : " + amount);
+            account.setBalance(account.getBalance() - amount);
+            accountRepository.update(account);
+        } catch (Exception exception) {
+            throw new WithdrawException();
+        }
+    }
+    private void depositAmount(AccountEntity account, double amount) throws DepositException {
+        try {
+            logger.log(Level.INFO, "deposit : " + amount);
+            account.setBalance(account.getBalance() + amount);
+            accountRepository.update(account);
+        } catch (Exception e) {
+            throw new DepositException();
+        }
+    }
+
 }

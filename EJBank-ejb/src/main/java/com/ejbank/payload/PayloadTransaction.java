@@ -56,4 +56,15 @@ public class PayloadTransaction implements Serializable {
     public void setError(String error) {
         this.error = error;
     }
+
+    @Override
+    public String toString() {
+        return "PayloadTransaction{" +
+                "result=" + result +
+                ", before=" + before +
+                ", after=" + after +
+                ", message='" + message + '\'' +
+                ", error='" + error + '\'' +
+                '}';
+    }
 }
