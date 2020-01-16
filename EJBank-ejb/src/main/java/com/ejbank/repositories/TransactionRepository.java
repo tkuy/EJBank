@@ -18,5 +18,8 @@ public class TransactionRepository {
     public void create(TransactionEntity transactionEntity) {
         em.persist(transactionEntity);
     }
+    public void update(TransactionEntity transactionEntity) {
+        em.merge(transactionEntity);
+    }
 
 }

@@ -4,7 +4,6 @@ import com.ejbank.entities.AccountEntity;
 import com.ejbank.entities.TransactionEntity;
 import com.ejbank.entities.UserEntity;
 import com.ejbank.errors.DepositException;
-import com.ejbank.errors.TransactionException;
 import com.ejbank.errors.TransactionInsertionException;
 import com.ejbank.errors.WithdrawException;
 import com.ejbank.payload.*;
@@ -12,12 +11,12 @@ import com.ejbank.repositories.AccountRepository;
 import com.ejbank.repositories.TransactionRepository;
 import com.ejbank.repositories.UserRepository;
 
-import javax.annotation.Resource;
 import javax.ejb.*;
 import javax.inject.Inject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.transaction.*;
+import javax.validation.Payload;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,21 +79,7 @@ public class TransactionBean implements TransactionBeanLocal, Serializable {
                 logger.log(Level.INFO, "The transaction will be applied");
                 AccountEntity src = accountRepository.findById(payloadTransactionRequest.getSource());
                 AccountEntity dest = accountRepository.findById(payloadTransactionRequest.getDestination());
-                try {
-                    tx.begin();
-                    withdrawAmount(src, payloadTransactionRequest.getAmount());
-                    depositAmount(dest, payloadTransactionRequest.getAmount());
-                    createTransaction(transactionEntity);
-                    tx.commit();
-                } catch (WithdrawException | DepositException | TransactionInsertionException e) {
-                    try {
-                        tx.rollback();
-                    } catch (SystemException ex) {
-                        return new PayloadResult(false, "The operation failed, you can try again later");
-                    }
-                } catch (HeuristicRollbackException | HeuristicMixedException | SystemException | NotSupportedException | RollbackException e) {
-                    return new PayloadResult(false, "Internal error, don't worry");
-                }
+                return applyAndCreateTransaction(transactionEntity, src, dest, payloadTransactionRequest.getAmount(), payloadTransaction.getMessage());
             } else {
                 try {
                     logger.log(Level.INFO, "The transaction will not be applied but only inserted");
@@ -106,10 +91,70 @@ public class TransactionBean implements TransactionBeanLocal, Serializable {
         }
         return new PayloadResult(payloadTransaction.isResult(), payloadTransaction.getMessage());
     }
+    public PayloadResult validateTransaction(PayloadTransactionValidationRequest payload) {
+        if(payload.isApprove()) {
+            TransactionEntity transactionEntity = transactionRepository.findById(payload.getTransaction());
+            transactionEntity.setApplied(true);
+            return applyAndUpdateTransaction(
+                    transactionEntity,
+                    transactionEntity.getSrc(),
+                    transactionEntity.getDest(),
+                    transactionEntity.getAmount(),
+                    "The transaction has been done.");
+        } else {
+            return new PayloadResult(false, "The transaction has been refused");
+        }
+    }
+    private PayloadResult applyAndCreateTransaction(TransactionEntity transactionEntity, AccountEntity src, AccountEntity dest, double amount, String successfulMessage) {
+        try {
+            tx.begin();
+            withdrawAmount(src, amount);
+            depositAmount(dest, amount);
+            createTransaction(transactionEntity);
+            tx.commit();
+        } catch (WithdrawException | DepositException | TransactionInsertionException e) {
+            try {
+                tx.rollback();
+            } catch (SystemException ex) {
+                return new PayloadResult(false, "The operation failed, you can try again later");
+            }
+        } catch (HeuristicRollbackException | HeuristicMixedException | SystemException | NotSupportedException | RollbackException e) {
+            return new PayloadResult(false, "Internal error, don't worry");
+        }
+        return new PayloadResult(true, successfulMessage);
+    }
+    private PayloadResult applyAndUpdateTransaction(TransactionEntity transactionEntity, AccountEntity src, AccountEntity dest, double amount, String successfulMessage) {
+        try {
+            tx.begin();
+            withdrawAmount(src, amount);
+            depositAmount(dest, amount);
+            updateTransaction(transactionEntity);
+            tx.commit();
+        } catch (WithdrawException | DepositException | TransactionInsertionException e) {
+            try {
+                tx.rollback();
+            } catch (SystemException ex) {
+                return new PayloadResult(false, "The operation failed, you can try again later");
+            }
+        } catch (HeuristicRollbackException | HeuristicMixedException | SystemException | NotSupportedException | RollbackException e) {
+            return new PayloadResult(false, "Internal error, don't worry");
+        }
+        return new PayloadResult(true, successfulMessage);
+    }
+
+
     private void createTransaction(TransactionEntity transactionEntity) throws TransactionInsertionException {
         try {
             logger.log(Level.INFO, "Insert transaction");
             transactionRepository.create(transactionEntity);
+        } catch (Exception e) {
+            throw new TransactionInsertionException();
+        }
+    }
+    private void updateTransaction(TransactionEntity transactionEntity) throws TransactionInsertionException {
+        try {
+            logger.log(Level.INFO, "Update transaction");
+            transactionRepository.update(transactionEntity);
         } catch (Exception e) {
             throw new TransactionInsertionException();
         }
@@ -144,10 +189,8 @@ public class TransactionBean implements TransactionBeanLocal, Serializable {
 
     @Override
     public PayloadTransactions listTransactions(int userId, int accountId, int offset) {
-        UserEntity user = userRepository.findById(userId);
         AccountEntity account = accountRepository.findById(accountId);
         List<PayloadTransactionFull> payload = new ArrayList<PayloadTransactionFull>();
-
         List<TransactionEntity> transactions = account.getTransactionsFrom();
         for (TransactionEntity transaction : transactions) {
             payload.add(new PayloadTransactionFull(

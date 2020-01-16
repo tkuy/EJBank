@@ -1,6 +1,7 @@
 package com.ejbank.api;
 
 import com.ejbank.payload.*;
+import com.ejbank.sessions.TransactionBean;
 import com.ejbank.sessions.TransactionBeanLocal;
 
 import javax.ejb.EJB;
@@ -39,6 +40,14 @@ public class Transaction {
     @Path("/list/{account_id}/{offset}/{user_id}")
     public PayloadTransactions listTransations(@PathParam("user_id") int userId, @PathParam("account_id") int accountId, @PathParam("offset") int offset) {
         return transactionBeanLocal.listTransactions(userId, accountId, offset);
+    }
+
+    @POST
+    @Path("/validation")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public PayloadResult validateTransaction(PayloadTransactionValidationRequest payload) {
+        System.out.println("Validate Transaction");
+        return transactionBeanLocal.validateTransaction(payload);
     }
 
 

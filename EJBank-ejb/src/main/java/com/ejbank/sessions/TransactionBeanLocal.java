@@ -11,4 +11,5 @@ public interface TransactionBeanLocal {
     PayloadResult commitTransaction(PayloadTransactionRequest payloadTransactionRequest);
     int getAllWaitingTransactions(int userId);
     PayloadTransactions listTransactions(int userId, int accountId, int offset);
+    PayloadResult validateTransaction(PayloadTransactionValidationRequest payload);
 }
