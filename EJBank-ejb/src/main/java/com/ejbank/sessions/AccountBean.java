@@ -1,11 +1,10 @@
 package com.ejbank.sessions;
 
-import com.ejbank.entities.AccountEntity;
-import com.ejbank.entities.AdvisorEntity;
-import com.ejbank.entities.CustomerEntity;
-import com.ejbank.entities.UserEntity;
+import com.ejbank.entities.*;
 import com.ejbank.payload.PayloadAccount;
+import com.ejbank.payload.PayloadAccountFull;
 import com.ejbank.payload.PayloadAccounts;
+import com.ejbank.repositories.AccountRepository;
 import com.ejbank.repositories.AdvisorRepository;
 import com.ejbank.repositories.CustomerRepository;
 import com.ejbank.repositories.UserRepository;
@@ -25,13 +24,15 @@ public class AccountBean implements AccountBeanLocal {
     private AdvisorRepository advisorRepository;
     @Inject
     private UserRepository userRepository;
+    @Inject
+    private AccountRepository accountRepository;
 
     @Override
     public PayloadAccounts accountsByUser(int userId) {
         List<PayloadAccount> accounts = new ArrayList<>();
 
         CustomerEntity customerEntity = customerRepository.findById(userId);
-        if(customerEntity != null) {
+        if (customerEntity != null) {
             for (AccountEntity accountEntity : customerEntity.getAccounts()) {
                 accounts.add(new PayloadAccount(accountEntity.getId(), accountEntity.getAccountType().getName(), accountEntity.getBalance(), customerEntity.getFirstname() + " " + customerEntity.getLastname()));
             }
@@ -45,10 +46,10 @@ public class AccountBean implements AccountBeanLocal {
     public PayloadAccounts accountsByAdvisor(int userId) {
         List<PayloadAccount> accounts = new ArrayList<>();
         AdvisorEntity advisor = advisorRepository.findById(userId);
-        if(advisor != null) {
+        if (advisor != null) {
             for (CustomerEntity customer : advisor.getCustomers()) {
                 for (AccountEntity account : customer.getAccounts()) {
-                    accounts.add(new PayloadAccount(account.getId(), account.getAccountType().getName(), account.getBalance(), customer.getFirstname()+" "+customer.getLastname()));
+                    accounts.add(new PayloadAccount(account.getId(), account.getAccountType().getName(), account.getBalance(), customer.getFirstname() + " " + customer.getLastname()));
                 }
             }
             return new PayloadAccounts(accounts);
@@ -56,6 +57,20 @@ public class AccountBean implements AccountBeanLocal {
             return new PayloadAccounts(accounts, "Vous n'êtes pas un conseiller");
         }
     }
+
+    @Override
+    public PayloadAccountFull accountByUser(int userId, int accountId) {
+        CustomerEntity customerEntity = customerRepository.findById(userId);
+        AccountEntity accountEntity = accountRepository.findById(accountId);
+        if (customerEntity == null) { return new PayloadAccountFull("Vous n'êtes pas un client"); }
+        if (accountEntity == null) { return new PayloadAccountFull("Ceci n'est pas un compte"); }
+        if (!customerEntity.getAccounts().contains(accountEntity)) { return new PayloadAccountFull("Ce compte ne vous est pas accessible"); }
+
+        AdvisorEntity advisor = advisorRepository.findById(customerEntity.getAdvisorId());
+        AccountTypeEntity accountType = accountEntity.getAccountType();
+        return new PayloadAccountFull(customerEntity.getFormattedName(), advisor.getFormattedName(), accountType.getRate(), accountEntity.getBalance()*(accountType.getRate()/100), accountEntity.getBalance());
+
+}
 
     @Override
     public PayloadAccounts allAccounts(int userId) {
@@ -67,5 +82,4 @@ public class AccountBean implements AccountBeanLocal {
             return accountsByAdvisor(userId);
         }
     }
-
 }

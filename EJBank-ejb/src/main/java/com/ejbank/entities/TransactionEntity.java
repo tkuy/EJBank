@@ -104,5 +104,5 @@ public class TransactionEntity {
     public void setDate(Date date) {
         this.date = date;
     }
-    
+
 }

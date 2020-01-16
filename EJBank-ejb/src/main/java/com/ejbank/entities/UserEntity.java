@@ -42,6 +42,8 @@ public abstract class UserEntity {
         return lastname;
     }
 
+    public String getFormattedName() { return firstname + " " +lastname; }
+
     public String getType() {
         return type;
     }
