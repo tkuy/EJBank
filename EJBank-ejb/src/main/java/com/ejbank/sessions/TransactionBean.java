@@ -7,9 +7,7 @@ import com.ejbank.errors.DepositException;
 import com.ejbank.errors.TransactionException;
 import com.ejbank.errors.TransactionInsertionException;
 import com.ejbank.errors.WithdrawException;
-import com.ejbank.payload.PayloadResult;
-import com.ejbank.payload.PayloadTransaction;
-import com.ejbank.payload.PayloadTransactionRequest;
+import com.ejbank.payload.*;
 import com.ejbank.repositories.AccountRepository;
 import com.ejbank.repositories.TransactionRepository;
 import com.ejbank.repositories.UserRepository;
@@ -21,6 +19,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.transaction.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,9 +44,11 @@ public class TransactionBean implements TransactionBeanLocal, Serializable {
     @Override
     public PayloadTransaction previewTransaction(PayloadTransactionRequest payloadTransactionRequest) {
         AccountEntity src = accountRepository.findById(payloadTransactionRequest.getSource());
+        AccountEntity dest = accountRepository.findById(payloadTransactionRequest.getDestination());
         double before = src.getBalance();
-        double after = src.getBalance() - payloadTransactionRequest.getAmount();
-        boolean result = after >= (-src.getAccountType().getOverdraft());
+        double afterSource = src.getBalance() - payloadTransactionRequest.getAmount();
+        boolean result = afterSource >= (-src.getAccountType().getOverdraft());
+        double after = dest.getBalance() + payloadTransactionRequest.getAmount();
         String message = null;
         if(!result) {
             message = "Vous ne disposez pas d'un solde suffisant";
@@ -69,7 +71,6 @@ public class TransactionBean implements TransactionBeanLocal, Serializable {
     @Override
     public PayloadResult commitTransaction(PayloadTransactionRequest payloadTransactionRequest) {
         logger.log(Level.INFO, "Commit");
-        System.out.println("SYSOUT");
         PayloadTransaction payloadTransaction = previewTransaction(payloadTransactionRequest);
         //enough money
         if(payloadTransaction.isResult()) {
@@ -140,4 +141,29 @@ public class TransactionBean implements TransactionBeanLocal, Serializable {
         }
         return rep;
     }
+
+    @Override
+    public PayloadTransactions listTransactions(int userId, int accountId, int offset) {
+        UserEntity user = userRepository.findById(userId);
+        AccountEntity account = accountRepository.findById(accountId);
+        List<PayloadTransactionFull> payload = new ArrayList<PayloadTransactionFull>();
+
+        List<TransactionEntity> transactions = account.getTransactionsFrom();
+        for (TransactionEntity transaction : transactions) {
+            payload.add(new PayloadTransactionFull(
+                    transaction.getId(),
+                    transaction.getDate(),
+                    transaction.getSrc().getAccountType().getName(),
+                    transaction.getDest().getAccountType().getName()    ,
+                    userRepository.findById(transaction.getDest().getCustomerId()).getFormattedName(),
+                    transaction.getAmount(),
+                    transaction.getAuthor().getFormattedName(),
+                    transaction.getComment(),
+                    transaction.isApplied() ? "APPLYED" : "TO_APPROVE"
+            ));
+        }
+        return new PayloadTransactions(transactions.size(), payload);
+    }
+
+
 }

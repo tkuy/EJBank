@@ -1,8 +1,6 @@
 package com.ejbank.api;
 
-import com.ejbank.payload.PayloadResult;
-import com.ejbank.payload.PayloadTransaction;
-import com.ejbank.payload.PayloadTransactionRequest;
+import com.ejbank.payload.*;
 import com.ejbank.sessions.TransactionBeanLocal;
 
 import javax.ejb.EJB;
@@ -36,5 +34,13 @@ public class Transaction {
     public int validationNumber(@PathParam("user_id") int id) {
         return transactionBeanLocal.getAllWaitingTransactions(id);
     }
+
+    @GET
+    @Path("/list/{account_id}/{offset}/{user_id}")
+    public PayloadTransactions listTransations(@PathParam("user_id") int userId, @PathParam("account_id") int accountId, @PathParam("offset") int offset) {
+        return transactionBeanLocal.listTransactions(userId, accountId, offset);
+    }
+
+
 
 }

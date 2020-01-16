@@ -1,5 +1,6 @@
 package com.ejbank.api;
 
+import com.ejbank.payload.PayloadAccountFull;
 import com.ejbank.payload.PayloadAccounts;
 import com.ejbank.sessions.AccountBeanLocal;
 
@@ -11,7 +12,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-@Path("/accounts")
+@Path("/account")
 @Produces(MediaType.APPLICATION_JSON)
 @RequestScoped
 public class Account {
@@ -19,27 +20,9 @@ public class Account {
     private AccountBeanLocal accountBeanLocal ;
 
     @GET
-    @Path("/{user_id}")
-    public PayloadAccounts getUserInfo(@PathParam("user_id") int id) {
-        return accountBeanLocal.accountsByUser(id);
-    }
-
-    @GET
-    @Path("/test")
-    public String getUser() {
-        return "Response";
-    }
-
-    @GET
-    @Path("/attached/{user_id}")
-    public PayloadAccounts getAllUserAccounts(@PathParam("user_id") int id) {
-        return accountBeanLocal.accountsByAdvisor(id);
-    }
-
-    @GET
-    @Path("/all/{user_id}")
-    public PayloadAccounts getAllAccounts(@PathParam("user_id") int id) {
-        return accountBeanLocal.allAccounts(id);
+    @Path("/{account_id}/{user_id}")
+    public PayloadAccountFull accountDetail(@PathParam("user_id") int userId, @PathParam("account_id") int accountId) {
+        return accountBeanLocal.accountByUser(userId, accountId);
     }
 
 }
