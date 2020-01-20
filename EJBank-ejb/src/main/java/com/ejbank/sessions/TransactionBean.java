@@ -11,12 +11,13 @@ import com.ejbank.repositories.AccountRepository;
 import com.ejbank.repositories.TransactionRepository;
 import com.ejbank.repositories.UserRepository;
 
-import javax.ejb.*;
+import javax.ejb.Stateless;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.inject.Inject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.transaction.*;
-import javax.validation.Payload;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +86,7 @@ public class TransactionBean implements TransactionBeanLocal, Serializable {
                     logger.log(Level.INFO, "The transaction will not be applied but only inserted");
                     createTransaction(transactionEntity);
                 } catch (TransactionInsertionException e) {
-                    return new PayloadResult(false, "Insertion failed for the transaction");
+                    return new PayloadResult(false, "La création de la transaction a échouée");
                 }
             }
         }
@@ -100,9 +101,9 @@ public class TransactionBean implements TransactionBeanLocal, Serializable {
                     transactionEntity.getSrc(),
                     transactionEntity.getDest(),
                     transactionEntity.getAmount(),
-                    "The transaction has been done.");
+                    "La transaction a été approuvée et réalisée avec succès.");
         } else {
-            return new PayloadResult(false, "The transaction has been refused");
+            return new PayloadResult(false, "La transaction a été refusée par le conseiller.");
         }
     }
     private PayloadResult applyAndCreateTransaction(TransactionEntity transactionEntity, AccountEntity src, AccountEntity dest, double amount, String successfulMessage) {
@@ -116,7 +117,7 @@ public class TransactionBean implements TransactionBeanLocal, Serializable {
             try {
                 tx.rollback();
             } catch (SystemException ex) {
-                return new PayloadResult(false, "The operation failed, you can try again later");
+                return new PayloadResult(false, "La transaction n'a pas été effectuée correctement. Aucun transfert d'argent n'a été réalisé.");
             }
         } catch (HeuristicRollbackException | HeuristicMixedException | SystemException | NotSupportedException | RollbackException e) {
             return new PayloadResult(false, "Internal error, don't worry");
@@ -134,10 +135,10 @@ public class TransactionBean implements TransactionBeanLocal, Serializable {
             try {
                 tx.rollback();
             } catch (SystemException ex) {
-                return new PayloadResult(false, "The operation failed, you can try again later");
+                return new PayloadResult(false, "L'opération a échoué suite à une erreur technique. Réessayez plus tard.");
             }
         } catch (HeuristicRollbackException | HeuristicMixedException | SystemException | NotSupportedException | RollbackException e) {
-            return new PayloadResult(false, "Internal error, don't worry");
+            return new PayloadResult(false, "Oh... Erreur technique.");
         }
         return new PayloadResult(true, successfulMessage);
     }
