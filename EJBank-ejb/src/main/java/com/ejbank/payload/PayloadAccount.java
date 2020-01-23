@@ -7,6 +7,7 @@ public class PayloadAccount implements Serializable {
     private String type;
     private Double amount;
     private String user;
+    private int validation;
 
     private static final long SerialVersionUID = 1L;
 
@@ -14,6 +15,14 @@ public class PayloadAccount implements Serializable {
         this.id = id;
         this.type = type;
         this.amount = amount;
+    }
+
+    public PayloadAccount(int id, String type, Double amount, String user, int validation) {
+        this.id = id;
+        this.type = type;
+        this.amount = amount;
+        this.user = user;
+        this.validation = validation;
     }
 
     public PayloadAccount(int id, String type, Double amount, String user) {
@@ -37,5 +46,9 @@ public class PayloadAccount implements Serializable {
 
     public String getUser() {
         return user;
+    }
+
+    public int getValidation() {
+        return validation;
     }
 }

@@ -4,10 +4,7 @@ import com.ejbank.entities.*;
 import com.ejbank.payload.PayloadAccount;
 import com.ejbank.payload.PayloadAccountFull;
 import com.ejbank.payload.PayloadAccounts;
-import com.ejbank.repositories.AccountRepository;
-import com.ejbank.repositories.AdvisorRepository;
-import com.ejbank.repositories.CustomerRepository;
-import com.ejbank.repositories.UserRepository;
+import com.ejbank.repositories.*;
 
 import javax.ejb.Local;
 import javax.ejb.Stateless;
@@ -26,6 +23,8 @@ public class AccountBean implements AccountBeanLocal {
     private UserRepository userRepository;
     @Inject
     private AccountRepository accountRepository;
+    @Inject
+    private TransactionRepository transactionRepository;
 
     @Override
     public PayloadAccounts accountsByUser(int userId) {
@@ -49,7 +48,13 @@ public class AccountBean implements AccountBeanLocal {
         if (advisor != null) {
             for (CustomerEntity customer : advisor.getCustomers()) {
                 for (AccountEntity account : customer.getAccounts()) {
-                    accounts.add(new PayloadAccount(account.getId(), account.getAccountType().getName(), account.getBalance(), customer.getFirstname() + " " + customer.getLastname()));
+                    int cpt = 0;
+                    for (TransactionEntity transactionEntity : account.getTransactionsFrom()) {
+                        if(!transactionEntity.isApplied()) {
+                            cpt++;
+                        }
+                    }
+                    accounts.add(new PayloadAccount(account.getId(), account.getAccountType().getName(), account.getBalance(), customer.getFirstname() + " " + customer.getLastname(), cpt));
                 }
             }
             return new PayloadAccounts(accounts);
@@ -74,7 +79,6 @@ public class AccountBean implements AccountBeanLocal {
 
     @Override
     public PayloadAccounts allAccounts(int userId) {
-        List<PayloadAccount> accounts = new ArrayList<>();
         UserEntity user = userRepository.findById(userId);
         if (user.getType().equals("customer")) {
             return accountsByUser(userId);
